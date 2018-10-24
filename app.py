@@ -6,13 +6,12 @@ Created on Wed Oct 23 19:26:05 2018
 @author: Han
 """
 
-#from tkinter import * #Tk, Label, Button
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk #make button fancy
 
-LARGE_FONT = ("Verdana", 12)
+LARGE_FONT = ("Verdana", 12) # set up a front for future use
 
-class app(tk.Tk):
+class app(tk.Tk): 
     
     def __init__(self,*args, **kwargs):
         
