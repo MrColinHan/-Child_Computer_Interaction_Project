@@ -27,7 +27,7 @@ class app(tk.Tk):
         container.grid_columnconfigure(0,weight = 1)
 
         self.frames = {}
-        # loop to switch pages
+        # a loop to switch pages
         for F in (StartPage, PageChildren, PageChores, PageBank,
                   PageParents, PageEditBank, PageEditChores, PageAllKids): 
             
@@ -39,37 +39,32 @@ class app(tk.Tk):
 
         self.show_frame(StartPage)
 
-    def show_frame(self, page): # function to show the page "page"
+    def show_frame(self, page): # a function to show the page
 
         frame = self.frames[page]
         frame.tkraise()
-################ functions for database starts here: 
-    def ConnectDataBase(): # function to connect the app database
-        #conn = sqlite3.connect('/Users/Han/Documents/CS 4980 Child-Computer Interaction(2018 FALL)/Child_Computer_Interaction_Project/AppData.db')
+################ functions for database starts here:
+        
+    def ConnectDataBase(): # just for testing
         conn = sqlite3.connect('AppData.db')
         print("Opened database successfully")
-
         conn.close()
 
 
-    def CreateKidsTable():
-        #conn = sqlite3.connect('/Users/Han/Documents/CS 4980 Child-Computer Interaction(2018 FALL)/Child_Computer_Interaction_Project/AppData.db')
+    def CreateKidsTable(): # create a Kids Table if there is no Kids Table in the database
+
         conn = sqlite3.connect('AppData.db')
+        print("Opened database successfully")
         conn.execute('''CREATE TABLE if not exists Kids
             (number INT, name TEXT, age INT)''')
         print ("Kids Table created successfully or already exists")
         conn.close()
 
-    #def CreateKidsTable(self):
-    #   conn = sqlite3.connect('AppData.db')
-    #    try:
-    #        conn.execute('''CREATE TABLE Kids
-    #        (name text)''')
-    #        print ("Kids Table created successfully")
-    #    except sqlite3.IntegrityError:
-    #        print("Kids Table already exists")
-
     def InsertNewKid(self,number,name,age):
+        # insert a new kid's info into the Kids table in the database
+        # One kid has three properties: number, name and age
+        # User only need to type name and age, number is only used to keep track of the number of Kids in a family
+        # one number slot can only register for one kid, so there won't be two kids both have 1 as number
         conn = sqlite3.connect('AppData.db')
         with conn:
             cur = conn.cursor()
@@ -86,13 +81,15 @@ class app(tk.Tk):
                 print("There's already a kid registered in this page. You can only update the name. ")
         conn.close()
 
-    def UpdateKid():
+    def UpdateKid(): # enable a kid to change a name or age
         pass
     
-    def DeleteKid():
+    def DeleteKid(): #enable a kid to delete his/her account
         pass
 
-    def GetKidNameAge(self,num): # input the kid number, if the number exists then get the name
+    def GetKidNameAge(self,num):
+        # input is the kid's number, if the number exists then return the name
+        # Otherwise return a default message
         conn = sqlite3.connect('AppData.db')
         with conn:
             cur = conn.cursor()
@@ -114,8 +111,7 @@ class app(tk.Tk):
                 return (default)
          
 
-    def CreateChoreTable(self):
-        #conn = sqlite3.connect('/Users/Han/Documents/CS 4980 Child-Computer Interaction(2018 FALL)/Child_Computer_Interaction_Project/AppData.db')
+    def CreateChoreTable(self): # create a Chore Table if there is no Kids Table in the database
         conn = sqlite3.connect('AppData.db')
         conn.execute('''CREATE TABLE if not exists Chore
             (Chore text, time text, status text)''')
@@ -125,16 +121,16 @@ class app(tk.Tk):
     def InsertNewChore(self):
         pass
 
-    def CreateBankTable(self):
-        #conn = sqlite3.connect('/Users/Han/Documents/CS 4980 Child-Computer Interaction(2018 FALL)/Child_Computer_Interaction_Project/AppData.db')
+    def CreateBankTable(self): # create a Bank Table if there is no Kids Table in the database
         conn = sqlite3.connect('AppData.db')
         conn.execute('''CREATE TABLE if not exists Bank
             (name text, figure text)''')
         print ("Bank Table created successfully or already exists")
         conn.close()
+        
+################ functions for database STOPs here########################
 
-app.ConnectDataBase()
-app.CreateKidsTable()
+app.CreateKidsTable() # make sure the database has a Kids table so that the program can run properly 
 
 
 class StartPage(tk.Frame):  # this is the start page for the app
@@ -154,7 +150,6 @@ class StartPage(tk.Frame):  # this is the start page for the app
                             command = lambda: controller.show_frame(PageParents))
         button2.pack(pady = 50, padx = 10)
 
-app.ConnectDataBase()
 
 class PageAllKids(tk.Frame): # Kids select their own page (for multiple children family use)
 
@@ -180,9 +175,16 @@ class PageAllKids(tk.Frame): # Kids select their own page (for multiple children
                             command = lambda: controller.show_frame(StartPage))
         button4.pack()
 
-app.ConnectDataBase()
 
 class PageChildren(tk.Frame): # Children main page
+
+    def combine_funcs(a):
+        def combined_func(args,kwargs):
+            for f in funcs:
+                f(args,kwargs)
+        return combined_func
+        
+        
     def changeInfo(labelx,labely,name,age):
         labelx['text'] = "Welcome " + name
         labely['text'] = "Age: " + str(age)
@@ -190,10 +192,7 @@ class PageChildren(tk.Frame): # Children main page
         Input = textBox.get()
         return (Input)
 
-    def __init__(self, parent, controller):
-
-        app.ConnectDataBase()
-        
+    def __init__(self, parent, controller):        
         
         tk.Frame.__init__(self, parent)
 
@@ -213,8 +212,11 @@ class PageChildren(tk.Frame): # Children main page
         ageBox.pack()
 
         RefreshButton = tk.Button(self,text = "refresh",
-                                  command = lambda:PageChildren.changeInfo(label1,label2,
-                                                                           controller.GetKidNameAge(1)[0],controller.GetKidNameAge(1)[1]))
+                                  command = lambda:PageChildren.combine_funcs(
+                                      PageChildren.changeInfo((label1,label2,controller.GetKidNameAge(1)[0],controller.GetKidNameAge(1)[1])),
+                                      controller.InsertNewKid(1,PageChildren.getInput(nameBox),PageChildren.getInput(ageBox))))
+                                  #PageChildren.changeInfo(label1,label2,
+                                                                          #controller.GetKidNameAge(1)[0],controller.GetKidNameAge(1)[1]))
         RefreshButton.pack()
 
         #button1 = tk.Button(self, text = "Click to change your Infor",
