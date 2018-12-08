@@ -25,12 +25,21 @@ def InsertNewKid():
     conn.close()
 
 def where():
+    num = "1"
     conn = sqlite3.connect('AppData.db')
     with conn:
         cur = conn.cursor()
-        cur.execute("SELECT name FROM Kids WHERE time = 11")
-        name = cur.fetchone()
-        print(name[0])
+        cur.execute('''SELECT number FROM Chore''')
+        rows = cur.fetchall()
+        numberList = []
+        for row in rows:
+            numberList.append(row[0])
+        print(numberList)
+        if num in numberList:
+            print("yes")
+
+        
+        
 '''
 def get():
     conn = sqlite3.connect('AppData.db')
@@ -44,5 +53,6 @@ def get():
 ConnectDataBase()
 CreateChoreTable()
 #InsertNewKid()
-where()
 
+
+where()
